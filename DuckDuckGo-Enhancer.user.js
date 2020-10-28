@@ -1,3 +1,5 @@
+var meta = {
+    rawmdb: function () {
 // ==UserScript==
 // @name         DuckDuckGo Enhancer
 // @namespace    https://github.com/buzamahmooza
@@ -17,10 +19,36 @@
 // @run-at       document-idle
 // @connect      *
 // @require      https://code.jquery.com/jquery-3.2.1.slim.min.js
-// @require      file:///C:\Users\faris\Dropbox\Apps\Tampermonkey\Scripts\Handy AF functions Faris.user.js
-// @require      file:///C:\Users\faris\Dropbox\Apps\Tampermonkey\ShowImages.js\ShowImages.js
-// @require      file:///C:\Users\faris\Dropbox\Apps\Tampermonkey\GM_downloader\GM_downloader.user.js
+// @require      https://github.com/FarisHijazi/ShowImages.js/raw/master/PProxy.js
+// @require      https://github.com/FarisHijazi/GM_downloader/raw/master/GM_Downloader.user.js
+// @require      https://github.com/FarisHijazi/ShowImages.js/raw/master/ShowImages.js
 // ==/UserScript==
+    }
+};
+if (meta.rawmdb && meta.rawmdb.toString && (meta.rawmdb = meta.rawmdb.toString())) {
+    var kv/*key,val*/, row = /\/\/\s+@(\S+)\s+(.+)/g;
+    while ((kv = row.exec(meta.rawmdb)) !== null) {
+        if (meta[kv[1]]) {
+            if (typeof meta[kv[1]] == 'string') meta[kv[1]] = [meta[kv[1]]];
+            meta[kv[1]].push(kv[2]);
+        } else meta[kv[1]] = kv[2];
+    }
+}
+meta.window = this;
+if (typeof unsafeWindow === 'undefined') {
+    var unsafeWindow = window;
+}
+(unsafeWindow.scriptMetas = unsafeWindow.scriptMetas || []);
+if (meta.hasOwnProperty('nodups')) {
+    if (new Set(unsafeWindow.scriptMetas.map(meta => meta.namespace + meta.name)).has(meta.namespace + meta.name)) {
+        const msg = 'Another script is trying to execute but @nodups is set. Stopping execution.\n' + meta.namespace + meta.name;
+        console.warn(msg);
+        throw Error(msg);
+        // return;
+    }
+}
+unsafeWindow.scriptMetas.push(meta);
+console.log('Script:', meta.name, 'meta:', meta);
 
 
 console.log('DuckDuckGo-enhancer');
@@ -294,4 +322,22 @@ function elementReady(selector, timeoutInMs = -1) {
             subtree: true
         });
     });
+}
+
+function addCss(cssStr, id = '') {
+    cssStr = String(cssStr).replace(/\n\n/g, '\n');
+    // check if already exists
+    const style = document.getElementById(id) || document.createElement('style');
+
+    if (style.styleSheet) {
+        style.styleSheet.cssText = cssStr;
+    } else {
+        style.innerText = cssStr;
+    }
+    if (!!id) style.id = id;
+    style.classList.add('addCss');
+    return elementReady('head').then(head => {
+        head.appendChild(style);
+        return style;
+    }).then((args) => (args));
 }
