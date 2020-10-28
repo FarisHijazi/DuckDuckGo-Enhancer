@@ -101,6 +101,7 @@ const Preferences = (function () {
  * Adds a mouseover listener to showOriginal if you hover over an image for a moment
  */
 const addHoverListener = (function () {
+    // TODO: fix this, detection working but show full image not working
     let pageX = 0;
     let pageY = 0;
 
@@ -148,57 +149,58 @@ const addHoverListener = (function () {
     'use strict';
 
     elementReady('#duckbar_static').then(buttonsContainer => {
-        buttonsContainer.appendChild($('<li class="zcm__item"><a href=' + (location.href.replace(/duckduckgo\.com\//, 'duckduckgo.com/i.js?')) + '>DDG js</a></li>')[0]);
+        // buttonsContainer.appendChild($('<li class="zcm__item"><a href=' + (location.href.replace(/duckduckgo\.com\//, 'duckduckgo.com/i.js?')) + '>DDG js</a></li>')[0]);
 
         //TODO: convert this button to a checkbox and it remembers across sessions (use GM_setValue)
-        const $showOriginalsButton = $('<li class="zcm__item"><a class="zcm__link  js-zci-link  js-zci-link--maps_expanded" href="JavaScript:void(0);">Show Originals</a></li>')
+        const $showOriginalsButton = $('<li class="zcm__item"><a class="zcm__link  js-zci-link  js-zci-link--maps_expanded" href="JavaScript:void(0);">👀 Show Originals</a></li>')
             .on('click', function (e) {
                 shouldShowImages = true;
                 showFullresImages();
             }).attr('id', 'showOriginalsButton')[0];
 
-        const $downloadAllButton = $('<li class="zcm__item"><a class="zcm__link  js-zci-link  js-zci-link--maps_expanded" href="JavaScript:void(0);">Download all</a></li>')
+        const $downloadAllButton = $('<li class="zcm__item"><a class="zcm__link  js-zci-link  js-zci-link--maps_expanded" href="JavaScript:void(0);">⬇️ Download all</a></li>')
             .on('click', function (e) {
                 zipFiles(document.querySelectorAll('div.tile.tile--img.img-link img'));
             }).attr('id', 'downloadAllButton')[0];
 
         // append them to the dropdowns bar
-        $('div.metabar__dropdowns-wrap > div')
-            .append($showOriginalsButton)
-            .append($downloadAllButton)
+        elementReady('div.metabar__dropdowns-wrap > div').then(el=>{
+            $(el).append($showOriginalsButton)
+            $(el).append($downloadAllButton)
+        })
     });
 
     observeDocument(handleImgBoxes);
 
 })();
 
-function createCheckbox(id, labelText = 'label', onChange = () => null, checked = false) {
-    checked = GM_getValue(id, checked); // load value, fallback to passed value
-
-    const $container = $('<div>').attr({
-        'id': id.trim() + '-div',
-        'class': 'sg',
-    }).css({
-        'display': 'inline',
-    });
-    const $checkbox = $('<input>').attr({
-        'id': id,
-        'type': 'checkbox',
-        'checked': checked,
-    });
-    const $label = $(`<label for="${id}">${labelText.replace(/\s/g, '&nbsp;')}</label>`);
-
-    $container.append($label)
-        .append($checkbox)
-        .change(function (e) {
-            if (typeof onChange === 'function')
-                onChange.call($checkbox[0], e);
-
-            GM_setValue(id, $checkbox[0].checked);
-        });
-
-    return $container[0];
-}
+// function createCheckbox(id, labelText = 'label', onChange = () => null, checked = false) {
+//     checked = GM_getValue(id, checked); // load value, fallback to passed value
+//
+//     const $container = $('<div>').attr({
+//         'id': id.trim() + '-div',
+//         'class': 'sg',
+//     }).css({
+//         'display': 'inline',
+//     });
+//     const $checkbox = $('<input>').attr({
+//         'id': id,
+//         'type': 'checkbox',
+//         'checked': checked,
+//     });
+//     const $label = $(`<label for="${id}">${labelText.replace(/\s/g, '&nbsp;')}</label>`);
+//
+//     $container.append($label)
+//         .append($checkbox)
+//         .change(function (e) {
+//             if (typeof onChange === 'function')
+//                 onChange.call($checkbox[0], e);
+//
+//             GM_setValue(id, $checkbox[0].checked);
+//         });
+//
+//     return $container[0];
+// }
 
 function navigateToJsPage() {
     location.assign(location.href.replace(/duckduckgo\.com\//, 'duckduckgo.com/i.js'));
@@ -271,6 +273,8 @@ function handleImgBoxes(mutations) {
         showFullresImages();
     }
 }
+
+// ===== helpers ======
 
 
 function observeDocument(callback) {
