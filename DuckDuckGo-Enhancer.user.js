@@ -4,7 +4,7 @@ var meta = {
 // @name         DuckDuckGo Enhancer
 // @namespace    https://github.com/buzamahmooza
 // @author       Faris Hijazi
-// @version      0.1
+// @version      0.2
 // @icon	     https://www.google.com/s2/favicons?domain=duckduckgo.com
 // @match        https://duckduckgo.com*
 // @include      https://duckduckgo.com*
@@ -101,7 +101,6 @@ const Preferences = (function () {
  * Adds a mouseover listener to showOriginal if you hover over an image for a moment
  */
 const addHoverListener = (function () {
-    // TODO: fix this, detection working but show full image not working
     let pageX = 0;
     let pageY = 0;
 
@@ -117,6 +116,8 @@ const addHoverListener = (function () {
         const img = imgBx.querySelector('img');
 
         function replaceImg() {
+            const item = getItemFromImg(img)
+            img.closest('a').setAttribute('href', item.image);
             showImages.replaceImgSrc(img, img.closest('a'));
         }
 
