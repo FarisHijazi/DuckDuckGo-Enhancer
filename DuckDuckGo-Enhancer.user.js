@@ -19,6 +19,7 @@ var meta = {
 // @run-at       document-idle
 // @connect      *
 // @require      https://code.jquery.com/jquery-3.2.1.slim.min.js
+// @require      https://raw.githubusercontent.com/Stuk/jszip/master/dist/jszip.min.js
 // @require      https://github.com/FarisHijazi/ShowImages.js/raw/master/PProxy.js
 // @require      https://github.com/FarisHijazi/GM_downloader/raw/master/GM_Downloader.user.js
 // @require      https://github.com/FarisHijazi/ShowImages.js/raw/master/ShowImages.js
@@ -150,7 +151,29 @@ const addHoverListener = (function () {
     'use strict';
 
     elementReady('#duckbar_static').then(buttonsContainer => {
-        // buttonsContainer.appendChild($('<li class="zcm__item"><a href=' + (location.href.replace(/duckduckgo\.com\//, 'duckduckgo.com/i.js?')) + '>DDG js</a></li>')[0]);
+        function downloadJSON() {
+            function anchorClick(href, downloadValue, target) {
+                var a = document.createElement('a');
+                a.setAttribute('href', href);
+                a.setAttribute('download', downloadValue);
+                a.target = target;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }
+            function makeTextFile(text) {
+                var data = new Blob([text], {type: 'text/plain'});
+                var textFile = null;
+                if (textFile !== null) window.URL.revokeObjectURL(textFile);
+                textFile = window.URL.createObjectURL(data);
+                return textFile;
+            }
+            const jsonText = JSON.stringify(DDG.duckbar.tabs.images.view.model.items, null, 4);
+            anchorClick(makeTextFile(jsonText), location.hostname + '.json');
+        }
+        
+        const $downloadJSONButton = $('<li class="zcm__item"><a class="zcm__link  js-zci-link  js-zci-link--maps_expanded" href="JavaScript:void(0);">Dwonload JSON {}</a></li>')
+            .on('click', downloadJSON)[0];
 
         //TODO: convert this button to a checkbox and it remembers across sessions (use GM_setValue)
         const $showOriginalsButton = $('<li class="zcm__item"><a class="zcm__link  js-zci-link  js-zci-link--maps_expanded" href="JavaScript:void(0);">👀 Show Originals</a></li>')
@@ -161,13 +184,18 @@ const addHoverListener = (function () {
 
         const $downloadAllButton = $('<li class="zcm__item"><a class="zcm__link  js-zci-link  js-zci-link--maps_expanded" href="JavaScript:void(0);">⬇️ Download all</a></li>')
             .on('click', function (e) {
-                zipFiles(document.querySelectorAll('div.tile.tile--img.img-link img'));
+                downloadJSON();
+                document.querySelectorAll('div.tile.tile--img.img-link img').forEach(img => {
+                    download(img.src, img.alt, {directory: document.title});
+                });
+                // zipFiles(document.querySelectorAll('div.tile.tile--img.img-link img'));
             }).attr('id', 'downloadAllButton')[0];
 
         // append them to the dropdowns bar
         elementReady('div.metabar__dropdowns-wrap > div').then(el=>{
             $(el).append($showOriginalsButton)
             $(el).append($downloadAllButton)
+            $(el).append($downloadJSONButton)
         })
     });
 
