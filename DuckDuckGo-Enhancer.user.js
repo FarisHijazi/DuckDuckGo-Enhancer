@@ -146,6 +146,9 @@ const addHoverListener = (function () {
     };
 })();
 
+//TODO: add poppup to show where the buttons are and instructions on hovering
+//TODO: add download button to image cells
+//TODO: mention if you need to show images before you click downlaod, and if they need to be loaded or not
 
 (function () {
     'use strict';
@@ -169,7 +172,7 @@ const addHoverListener = (function () {
                 return textFile;
             }
             const jsonText = JSON.stringify(DDG.duckbar.tabs.images.view.model.items, null, 4);
-            anchorClick(makeTextFile(jsonText), location.hostname + '.json');
+            anchorClick(makeTextFile(jsonText), location.hostname+' - '+document.title + '.json');
         }
         
         const $downloadJSONButton = $('<li class="zcm__item"><a class="zcm__link  js-zci-link  js-zci-link--maps_expanded" href="JavaScript:void(0);">Dwonload JSON {}</a></li>')
